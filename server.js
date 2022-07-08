@@ -1,7 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const admin = require('./routes/admin');
+const shop = require('./routes/shop');
+const path = require('path');
 const app = express();
+
 
 /*
 EXPRESSjs is all about MIDDLEWARE means the incomming request is automatically passed through several functions in series by express js 
@@ -9,28 +12,21 @@ EXPRESSjs is all about MIDDLEWARE means the incomming request is automatically p
 instead of having 1 request handler we can have multiple handlers which the request will go through until a reponse is sent.
 */
 
-// this enable us to use "req.body" to extract the incomming data from the request.
-app.use(bodyParser.urlencoded({extended: false}));
+// though we are using "req.body" in the routes, parsing of the "request" can be done here, because every request goes through this middleware.
+app.use(bodyParser.urlencoded({extended:false}))
+
+app.use(express.static(path.join(__dirname,'public')));
 
 
-// use() allows us to add a new middleware function.
-app.get('/add-new-product',(req, res,next)=>{
-    console.log('add product');
-    res.send('<form action="/add-new-product" method="POST"><input type="text" name="product"><button type="submit">ok</button></form>');
-    // next() allows the request to go to the next middleware in line.
-});
+// even though we have used HTTP verb to handle request, still the order of the routes should be considered. in case, we want to use() method in future.
+app.use('/admin',admin); // take the common path of the routes for admin. now every page related to the admin must be requested as "/admin/add-product" for instance.
+app.use(shop);
 
-//unlike use(), thees HTTP verbs like get and post use the exact path matches
-app.post('/add-new-product',(req, res,next)=>{
-  console.log(`You added ${req.body.product}.`);
-  res.redirect('/');
-});
-
-app.use('/',(req, res, next)=>{
-    console.log('Sent homepage.')
-    res.send('<h1>Hello from express</h1>');
-});
-
+// if the request doesnt find any path match it gets matched with '/' in this case we send 404 error page.
+// response's content type is "text/html" by default
+app.use((req,res,next)=>{ 
+  res.status(404).sendFile(path.join(__dirname,'views','404.html'))
+})
 
 app.listen(4464);
 
