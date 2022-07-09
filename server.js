@@ -8,7 +8,7 @@ const app = express();
 const admin = adminExports.router
 
 // telling the express to use pug as templating engine.
-app.set('view engine','pug');
+app.set('view engine','ejs');
 // default is already /views directory I'm just explicitly setting it.
 app.set('views','views' )
 
