@@ -1,11 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const adminExports = require('./routes/admin');
-const shop = require('./routes/shop');
 const path = require('path');
+
 const app = express();
 
-const admin = adminExports.router
+const errorRouter = require('./controllers/error')
+const adminRouter = require('./routes/admin');
+const shopRouter = require('./routes/shop');
 
 // telling the express to use pug as templating engine.
 app.set('view engine','ejs');
@@ -25,15 +26,12 @@ app.use(express.static(path.join(__dirname,'public')));
 
 
 // even though we have used HTTP verb to handle request, still the order of the routes should be considered. in case, we want to use() method in future.
-app.use('/admin',admin); // take the common path of the routes for admin. now every page related to the admin must be requested as "/admin/add-product" for instance.
-app.use(shop);
+app.use('/admin',adminRouter); // take the common path of the routes for admin. now every page related to the admin must be requested as "/admin/add-product" for instance.
+app.use(shopRouter);
 
 // if the request doesnt find any path match it gets matched with '/' in this case we send 404 error page.
 // response's content type is "text/html" by default
-app.use((req,res,next)=>{ 
-  res.status(404).render('404',{pageTitle:"page not found"})
-  //res.status(404).sendFile(path.join(__dirname,'views','404.html'))
-})
+app.use(errorRouter.get404);
 
 app.listen(4464);
 
